@@ -20,6 +20,16 @@ interface ChatMessagesProps {
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
     <div className="space-y-4 pr-4 h-80 overflow-y-auto">
       {messages.map((message, index) => (
@@ -56,6 +66,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
           )}
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };
@@ -91,4 +102,3 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, placeholder
     </form>
   );
 };
-

@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { ChatInput, ChatMessages, type Message } from "@/components/chat";
 import { User, Bot } from "lucide-react";
+import { users } from "@/lib/data";
 
 
 const profileQuestions = [
@@ -101,7 +102,28 @@ export default function CreateProfilePage() {
   };
   
   function onSubmit() {
-    console.log(profileData);
+    // This is a mock implementation. In a real app, you'd save this to a database.
+    const newUserProfile = {
+      id: `user-${Date.now()}`,
+      avatarUrl: `https://picsum.photos/seed/${profileData.name}/100/100`,
+      name: profileData.name,
+      startupName: profileData.startupName,
+      college: profileData.college,
+      description: profileData.description,
+      skills: profileData.skills.split(',').map(s => s.trim()),
+      experience: profileData.experience,
+      productDetails: profileData.productDetails,
+    };
+    
+    // For demonstration, we'll replace the existing user or add a new one.
+    if (users.length > 0) {
+        users[0] = newUserProfile;
+    } else {
+        users.push(newUserProfile);
+    }
+    
+    console.log(users);
+
     toast({
       title: "Profile Created!",
       description: "Your profile has been successfully created. You can now explore projects.",
