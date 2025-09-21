@@ -21,7 +21,7 @@ export default async function Home() {
                 </p>
                 <div className="pt-6">
                   <Button size="lg" asChild className="h-14 text-xl px-12">
-                    <Link href="/profile/create">Get Started</Link>
+                    <Link href="/login">Login / Sign Up</Link>
                   </Button>
                 </div>
               </div>

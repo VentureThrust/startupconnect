@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Rocket } from "lucide-react";
+import { Menu, Rocket, LogIn } from "lucide-react";
 import { NexusStartLogo } from "./icons";
 
 const navLinks = [
@@ -65,6 +65,12 @@ export function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+           <Button asChild variant="outline">
+            <Link href="/login">
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Link>
+          </Button>
           <Button asChild>
             <Link href="/projects/create">
               <Rocket className="mr-2 h-4 w-4" />
