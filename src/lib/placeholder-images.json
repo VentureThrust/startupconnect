@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "proj-1",
+      "description": "A mobile app to track and reduce your carbon footprint.",
+      "imageUrl": "https://picsum.photos/seed/proj1/600/400",
+      "imageHint": "nature technology"
+    },
+    {
+      "id": "proj-2",
+      "description": "An AI platform for drug discovery and molecular simulation.",
+      "imageUrl": "https://picsum.photos/seed/proj2/600/400",
+      "imageHint": "science lab"
+    },
+    {
+      "id": "proj-3",
+      "description": "A decentralized social network focused on privacy.",
+      "imageUrl": "https://picsum.photos/seed/proj3/600/400",
+      "imageHint": "digital network"
+    },
+    {
+      "id": "proj-4",
+      "description": "An AI-powered tool for generating unique digital art.",
+      "imageUrl": "https://picsum.photos/seed/proj4/600/400",
+      "imageHint": "abstract art"
+    }
+  ]
 }
