@@ -19,4 +19,8 @@ export type Project = {
   ownerId: string;
   imageUrl: string;
   imageHint: string;
+  compensation: 'paid' | 'equity' | 'partnership' | 'co-founder';
+  incentives?: string;
+  equitySplit?: string;
+  saved?: boolean;
 };

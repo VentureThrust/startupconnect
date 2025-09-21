@@ -22,6 +22,12 @@ export function ApplyDialog({ children }: { children: React.ReactNode }) {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
+    const message = formData.get('message') as string;
+    const contribution = formData.get('contribution') as string;
+
+    console.log({ message, contribution });
+
     toast({
       title: "Application Sent!",
       description: "The project owner has been notified. Good luck!",
@@ -46,7 +52,18 @@ export function ApplyDialog({ children }: { children: React.ReactNode }) {
               <Textarea
                 placeholder="Hi, I'm excited about this project because..."
                 id="message"
-                rows={6}
+                name="message"
+                rows={4}
+                required
+              />
+            </div>
+             <div className="grid w-full gap-1.5">
+              <Label htmlFor="contribution">How can you help?</Label>
+              <Textarea
+                placeholder="I can contribute by..."
+                id="contribution"
+                name="contribution"
+                rows={4}
                 required
               />
             </div>

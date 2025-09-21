@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import { projects, users } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Handshake, Users, Tag, CheckCircle, XCircle } from "lucide-react";
+import { Handshake, Users, Tag, CheckCircle, XCircle, Bookmark, Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { matchSkillsToProjects } from "@/ai/flows/match-skills-to-projects";
 import { Button } from "@/components/ui/button";
 import { ApplyDialog } from "@/components/apply-dialog";
+import Link from "next/link";
 
 type ProjectPageProps = {
   params: {
@@ -17,7 +18,7 @@ type ProjectPageProps = {
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = projects.find((p) => p.id === params.id);
-  const currentUser = users[0];
+  const currentUser = users.length > 0 ? users[0] : null;
 
   if (!project) {
     notFound();
@@ -25,11 +26,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const projectOwner = users.find((u) => u.id === project.ownerId) || { name: "A Founder", avatarUrl: "https://picsum.photos/seed/founder/100/100" };
 
-  const matchResult = await matchSkillsToProjects({
+  const matchResult = currentUser ? await matchSkillsToProjects({
     projectDescription: project.description,
     requiredSkills: project.requiredSkills,
     userSkills: currentUser.skills,
-  });
+  }) : { isMatch: false, matchReason: "Create a profile to see your skill match."};
+
+  const isOwner = currentUser && currentUser.id === project.ownerId;
 
   return (
     <div className="container mx-auto max-w-5xl py-12 px-4">
@@ -46,10 +49,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 data-ai-hint={project.imageHint}
               />
             </div>
-            <h1 className="font-headline text-5xl font-bold tracking-tighter">
-              {project.name}
-            </h1>
-            <p className="text-xl text-muted-foreground mt-2">{project.description}</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="font-headline text-5xl font-bold tracking-tighter">
+                  {project.name}
+                </h1>
+                <p className="text-xl text-muted-foreground mt-2">{project.description}</p>
+              </div>
+              {isOwner && (
+                <Button variant="outline" asChild>
+                  <Link href={`/projects/create?id=${project.id}`}>
+                    <Pencil className="mr-2"/> Edit
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
 
           <Separator />
@@ -87,6 +101,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <span className="font-semibold">Team Size:</span>
                 <span className="ml-2 text-muted-foreground">{project.teamSize}</span>
               </div>
+               <div className="flex items-start">
+                <Tag className="h-5 w-5 mr-3 mt-1 text-accent" />
+                <div>
+                  <span className="font-semibold">Compensation</span>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="secondary">{project.compensation}</Badge>
+                    {project.equitySplit && <Badge variant="secondary">{project.equitySplit}</Badge>}
+                    {project.incentives && <Badge variant="secondary">{project.incentives}</Badge>}
+                  </div>
+                </div>
+              </div>
               <div className="flex items-start">
                 <Tag className="h-5 w-5 mr-3 mt-1 text-accent" />
                 <div>
@@ -115,13 +140,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </CardContent>
           </Card>
           
-          <div className="pt-4">
+          <div className="pt-4 flex gap-2">
             <ApplyDialog>
               <Button size="lg" className="w-full">
                 <Handshake className="mr-2 h-5 w-5" />
                 Apply to Collaborate
               </Button>
             </ApplyDialog>
+            <Button size="lg" variant="outline" className="w-full">
+                <Bookmark className="mr-2 h-5 w-5" />
+                Save
+            </Button>
           </div>
         </div>
       </div>

@@ -18,6 +18,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { generateProfileQuestions } from "@/ai/flows/generate-profile-questions";
+import { useState } from "react";
+import { Loader } from "lucide-react";
 
 const profileFormSchema = z.object({
   startupName: z.string().min(2, {
@@ -38,6 +41,8 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export default function CreateProfilePage() {
   const { toast } = useToast();
   const router = useRouter();
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -50,6 +55,13 @@ export default function CreateProfilePage() {
     },
     mode: "onChange",
   });
+
+  async function getQuestions() {
+    setLoading(true);
+    const result = await generateProfileQuestions();
+    setQuestions(result.questions);
+    setLoading(false);
+  }
 
   function onSubmit(data: ProfileFormValues) {
     console.log(data);
@@ -70,90 +82,101 @@ export default function CreateProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="startupName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Startup Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Nexus Start" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>What does your startup do?</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="A brief, one-sentence pitch for your startup."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="skills"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Skills</FormLabel>
-                    <FormControl>
-                      <Input placeholder="React, Node.js, UI/UX Design..." {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Enter your skills, separated by commas.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="experience"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Previous Experience</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe your background, previous roles, and key achievements."
-                        rows={5}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="productDetails"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>About the Product You're Building</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="What is your product? What problem does it solve? What's the current stage (MVP, idea, etc.)?"
-                        rows={5}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Create Profile</Button>
-            </form>
-          </Form>
+          {!questions.length && (
+            <div className="text-center">
+              <p className="mb-4">Let our AI guide you through creating your profile.</p>
+              <Button onClick={getQuestions} disabled={loading}>
+                {loading && <Loader className="mr-2 animate-spin" />}
+                Start with AI
+              </Button>
+            </div>
+          )}
+          {questions.length > 0 && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                  control={form.control}
+                  name="startupName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{questions[0] || 'Startup Name'}</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Nexus Start" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{questions[1] || 'What does your startup do?'}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="A brief, one-sentence pitch for your startup."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="skills"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{questions[2] || 'Your Skills'}</FormLabel>
+                      <FormControl>
+                        <Input placeholder="React, Node.js, UI/UX Design..." {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Enter your skills, separated by commas.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="experience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{questions[3] || 'Your Previous Experience'}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe your background, previous roles, and key achievements."
+                          rows={5}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="productDetails"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{questions[4] || "About the Product You're Building"}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="What is your product? What problem does it solve? What's the current stage (MVP, idea, etc.)?"
+                          rows={5}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">Create Profile</Button>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
     </div>

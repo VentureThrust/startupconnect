@@ -1,16 +1,17 @@
-import { recommendRelevantProjects } from "@/ai/flows/recommend-relevant-projects";
 import { AiRecommendations } from "@/components/ai-recommendations";
 import { ProjectList } from "@/components/project-list";
 import { Button } from "@/components/ui/button";
 import { projects, users } from "@/lib/data";
 import { Rocket } from "lucide-react";
 import Link from "next/link";
+import { recommendRelevantProjects } from "@/ai/flows/recommend-relevant-projects";
+
 
 export default async function Home() {
-  const currentUser = users[0];
+  const currentUser = users.length > 0 ? users[0] : null;
   const allProjects = projects;
   
-  const recommendations = await recommendRelevantProjects({
+  const recommendations = currentUser ? await recommendRelevantProjects({
     userSkills: currentUser.skills,
     userExperience: currentUser.experience,
     projectDetails: allProjects.map((p) => ({
@@ -18,7 +19,7 @@ export default async function Home() {
       description: p.description,
       requiredSkills: p.requiredSkills,
     })),
-  });
+  }) : { recommendedProjectIds: [] };
 
   const recommendedProjects = allProjects.filter((p) =>
     recommendations.recommendedProjectIds.includes(p.id)
@@ -40,7 +41,7 @@ export default async function Home() {
                 </Link>
             </Button>
             <Button size="lg" variant="secondary" asChild>
-                <Link href="/profile/create">Create Your Profile</Link>
+                <Link href="/profile">Create Your Profile</Link>
             </Button>
         </div>
       </div>
@@ -53,7 +54,17 @@ export default async function Home() {
         <h2 className="font-headline text-3xl font-bold tracking-tight mb-8">
           Discover All Projects
         </h2>
-        <ProjectList projects={allProjects} />
+        {allProjects.length > 0 ? (
+          <ProjectList projects={allProjects} />
+        ) : (
+          <div className="text-center py-16 border-2 border-dashed rounded-lg">
+            <h3 className="text-2xl font-semibold">No projects yet.</h3>
+            <p className="text-muted-foreground mt-2">Be the first to post a project!</p>
+             <Button asChild className="mt-4">
+                <Link href="/projects/create">Post a Project</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

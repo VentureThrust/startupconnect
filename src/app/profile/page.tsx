@@ -1,13 +1,27 @@
 import Image from "next/image";
-import { users } from "@/lib/data";
+import { users, projects } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Pencil, User, Building, Lightbulb, Briefcase, Code } from "lucide-react";
+import { ProjectList } from "@/components/project-list";
 
 export default function ProfilePage() {
-  const user = users[0];
+  const user = users.length > 0 ? users[0] : null;
+  const userProjects = user ? projects.filter(p => p.ownerId === user.id) : [];
+
+  if (!user) {
+    return (
+        <div className="container mx-auto max-w-4xl py-12 px-4 text-center">
+            <h1 className="text-3xl font-bold font-headline mb-4">No Profile Found</h1>
+            <p className="text-muted-foreground mb-8">It looks like you haven't created a profile yet.</p>
+            <Button asChild>
+                <Link href="/profile/create">Create Your Profile</Link>
+            </Button>
+        </div>
+    )
+  }
 
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4">
@@ -70,6 +84,19 @@ export default function ProfilePage() {
                 </CardContent>
             </Card>
         </div>
+      </div>
+      <div className="mt-16">
+        <h2 className="font-headline text-3xl font-bold tracking-tight mb-8">My Projects</h2>
+        {userProjects.length > 0 ? (
+            <ProjectList projects={userProjects} />
+        ) : (
+            <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                <h3 className="text-2xl font-semibold">You haven't posted any projects yet.</h3>
+                <Button asChild className="mt-4">
+                    <Link href="/projects/create">Post a Project</Link>
+                </Button>
+            </div>
+        )}
       </div>
     </div>
   );

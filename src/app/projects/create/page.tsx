@@ -17,8 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useEffect } from "react";
+import { projects } from "@/lib/data";
+
 
 const projectFormSchema = z.object({
   projectName: z.string().min(3, {
@@ -34,6 +38,11 @@ const projectFormSchema = z.object({
   }),
   requiredSkills: z.string().min(1, { message: "Please enter at least one skill." }),
   teamSize: z.array(z.number()).min(1).max(1),
+  compensation: z.enum(["paid", "equity", "partnership", "co-founder"], {
+    required_error: "You need to select a compensation type.",
+  }),
+  equitySplit: z.string().optional(),
+  incentives: z.string().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -41,24 +50,47 @@ type ProjectFormValues = z.infer<typeof projectFormSchema>;
 export default function CreateProjectPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('id');
+
+  const existingProject = projectId ? projects.find(p => p.id === projectId) : undefined;
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      projectName: "",
-      description: "",
-      longDescription: "",
-      requiredSkills: "",
-      teamSize: [2],
+      projectName: existingProject?.name || "",
+      description: existingProject?.description || "",
+      longDescription: existingProject?.longDescription || "",
+      requiredSkills: existingProject?.requiredSkills.join(", ") || "",
+      teamSize: [existingProject?.teamSize || 2],
+      compensation: existingProject?.compensation || undefined,
+      equitySplit: existingProject?.equitySplit || "",
+      incentives: existingProject?.incentives || "",
     },
     mode: "onChange",
   });
 
+  useEffect(() => {
+    if (existingProject) {
+        form.reset({
+            projectName: existingProject.name,
+            description: existingProject.description,
+            longDescription: existingProject.longDescription,
+            requiredSkills: existingProject.requiredSkills.join(", "),
+            teamSize: [existingProject.teamSize],
+            compensation: existingProject.compensation,
+            equitySplit: existingProject.equitySplit,
+            incentives: existingProject.incentives,
+        });
+    }
+  }, [existingProject, form]);
+
+
   function onSubmit(data: ProjectFormValues) {
     console.log(data);
     toast({
-      title: "Project Posted!",
-      description: "Your project is now live for collaborators to discover.",
+      title: `Project ${existingProject ? 'Updated' : 'Posted'}!`,
+      description: `Your project is now ${existingProject ? 'updated' : 'live for collaborators to discover'}.`,
     });
     router.push("/");
   }
@@ -67,7 +99,7 @@ export default function CreateProjectPage() {
     <div className="container mx-auto max-w-2xl py-12 px-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline text-3xl">Post a New Project</CardTitle>
+          <CardTitle className="font-headline text-3xl">{existingProject ? 'Edit' : 'Post a New'} Project</CardTitle>
           <CardDescription>
             Describe your project and the skills you're looking for to find the perfect collaborators.
           </CardDescription>
@@ -155,8 +187,89 @@ export default function CreateProjectPage() {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="compensation"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Compensation Structure</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="paid" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Paid contract
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="equity" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Equity-based
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="partnership" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Partnership / Rev-share
+                          </FormLabel>
+                        </FormItem>
+                         <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="co-founder" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Join as a Co-founder (equity only)
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {form.watch("compensation") === "equity" && (
+                <FormField
+                  control={form.control}
+                  name="equitySplit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Equity Split Details</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 5% vested over 4 years" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+                <FormField
+                  control={form.control}
+                  name="incentives"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Incentives (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., $5000 bonus on MVP launch" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Any performance bonuses or other incentives.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Button type="submit">Post Project</Button>
+              <Button type="submit">{existingProject ? 'Update' : 'Post'} Project</Button>
             </form>
           </Form>
         </CardContent>
