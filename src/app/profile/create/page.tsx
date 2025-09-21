@@ -126,9 +126,9 @@ export default function CreateProfilePage() {
 
     toast({
       title: "Profile Created!",
-      description: "Your profile has been successfully created. You can now explore projects.",
+      description: "Your profile has been successfully created. You will be redirected to your profile.",
     });
-    router.push("/discover");
+    router.push("/profile");
   }
 
   return (

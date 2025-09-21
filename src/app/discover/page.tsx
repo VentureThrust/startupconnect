@@ -9,16 +9,21 @@ export default async function DiscoverPage() {
 
   let recommendedProjects: any[] = [];
   if (currentUser) {
-    const recommendations = await recommendRelevantProjects({
-      userSkills: currentUser.skills,
-      userExperience: currentUser.experience,
-      projectDetails: projects.map(p => ({
-        projectId: p.id,
-        description: p.description,
-        requiredSkills: p.requiredSkills,
-      })),
-    });
-    recommendedProjects = projects.filter(p => recommendations.recommendedProjectIds.includes(p.id));
+    try {
+      const recommendations = await recommendRelevantProjects({
+        userSkills: currentUser.skills,
+        userExperience: currentUser.experience,
+        projectDetails: projects.map(p => ({
+          projectId: p.id,
+          description: p.description,
+          requiredSkills: p.requiredSkills,
+        })),
+      });
+      recommendedProjects = projects.filter(p => recommendations.recommendedProjectIds.includes(p.id));
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      recommendedProjects = [];
+    }
   }
   
   const otherProjects = projects.filter(p => !recommendedProjects.find(rp => rp.id === p.id));
@@ -34,7 +39,7 @@ export default async function DiscoverPage() {
         <AiRecommendations projects={recommendedProjects} />
       )}
 
-      <ProjectList projects={otherProjects} />
+      <ProjectList projects={otherProjects.length > 0 ? otherProjects : projects} />
     </div>
   );
 }

@@ -2,7 +2,19 @@ import type { UserProfile, Project } from "./types";
 import { PlaceHolderImages } from "./placeholder-images";
 
 // This is a mock database. In a real application, you would use a real database.
-export const users: UserProfile[] = [];
+export const users: UserProfile[] = [
+    {
+        id: 'user-123',
+        name: 'Alex Doe',
+        avatarUrl: 'https://picsum.photos/seed/alex/100/100',
+        startupName: 'EcoTrack',
+        college: 'Stanford University',
+        description: 'Building a cleaner future, one step at a time.',
+        skills: ['React Native', 'Node.js', 'Firebase', 'UI/UX Design'],
+        experience: 'Led a team of developers to build a mobile app for a local non-profit. Passionate about sustainable technology.',
+        productDetails: 'EcoTrack is a mobile app that helps users track and reduce their carbon footprint through daily challenges and community goals.'
+    }
+];
 
 export const projects: Project[] = [
     {
