@@ -1,3 +1,6 @@
+
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -12,12 +15,27 @@ import { Badge } from "@/components/ui/badge";
 import type { Project } from "@/lib/types";
 import { Users, Tag, Bookmark } from "lucide-react";
 import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 type ProjectCardProps = {
   project: Project;
 };
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const { toast } = useToast();
+  const [isSaved, setIsSaved] = useState(project.saved || false);
+
+  const handleSave = () => {
+    // In a real app, you'd update this in a database
+    project.saved = !isSaved;
+    setIsSaved(!isSaved);
+    toast({
+      title: isSaved ? "Project Unsaved" : "Project Saved!",
+      description: isSaved ? `"${project.name}" has been removed from your saved projects.` : `"${project.name}" has been added to your saved projects.`,
+    });
+  };
+
   return (
     <Card className="h-full flex flex-col transition-all duration-300 ease-in-out hover:border-primary hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 group">
       <CardHeader>
@@ -38,8 +56,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
                     {project.name}
                 </CardTitle>
             </Link>
-            <Button variant="ghost" size="icon" className="shrink-0">
-                <Bookmark/>
+            <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSave}>
+                <Bookmark className={isSaved ? "fill-primary text-primary" : ""} />
                 <span className="sr-only">Save project</span>
             </Button>
         </div>

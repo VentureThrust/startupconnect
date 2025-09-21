@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -21,7 +22,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useEffect } from "react";
-import { projects } from "@/lib/data";
+import { projects, users } from "@/lib/data";
 
 
 const projectFormSchema = z.object({
@@ -52,6 +53,7 @@ export default function CreateProjectPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('id');
+  const currentUser = users.length > 0 ? users[0] : null;
 
   const existingProject = projectId ? projects.find(p => p.id === projectId) : undefined;
 
@@ -87,12 +89,58 @@ export default function CreateProjectPage() {
 
 
   function onSubmit(data: ProjectFormValues) {
+    if (!currentUser) {
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "You must have a profile to create a project.",
+        });
+        router.push('/profile/create');
+        return;
+    }
+
+    if (existingProject) {
+        // Update existing project
+        const projectIndex = projects.findIndex(p => p.id === existingProject.id);
+        if (projectIndex !== -1) {
+            projects[projectIndex] = {
+                ...projects[projectIndex],
+                name: data.projectName,
+                description: data.description,
+                longDescription: data.longDescription,
+                requiredSkills: data.requiredSkills.split(',').map(s => s.trim()),
+                teamSize: data.teamSize[0],
+                compensation: data.compensation,
+                equitySplit: data.equitySplit,
+                incentives: data.incentives,
+            };
+        }
+    } else {
+        // Create new project
+        const newProject = {
+            id: `proj-${Date.now()}`,
+            name: data.projectName,
+            description: data.description,
+            longDescription: data.longDescription,
+            requiredSkills: data.requiredSkills.split(',').map(s => s.trim()),
+            teamSize: data.teamSize[0],
+            ownerId: currentUser.id,
+            imageUrl: `https://picsum.photos/seed/proj-${Date.now()}/600/400`,
+            imageHint: 'startup office',
+            compensation: data.compensation,
+            equitySplit: data.equitySplit,
+            incentives: data.incentives,
+            saved: false,
+        };
+        projects.push(newProject);
+    }
+    
     console.log(data);
     toast({
       title: `Project ${existingProject ? 'Updated' : 'Posted'}!`,
       description: `Your project is now ${existingProject ? 'updated' : 'live for collaborators to discover'}.`,
     });
-    router.push("/");
+    router.push("/discover");
   }
 
   return (

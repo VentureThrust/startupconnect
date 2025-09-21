@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Rocket, LogIn } from "lucide-react";
+import { Menu, Rocket, LogIn, Bookmark } from "lucide-react";
 import { NexusStartLogo } from "./icons";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
+  { href: "/saved", label: "Saved Projects" },
   { href: "/projects/create", label: "Create Project" },
   { href: "/profile", label: "My Profile" },
 ];
