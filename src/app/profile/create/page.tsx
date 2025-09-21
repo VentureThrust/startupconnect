@@ -118,7 +118,8 @@ export default function CreateProfilePage() {
     // Replace the existing user or add a new one.
     users.splice(0, users.length, newUserProfile);
     
-    console.log(users);
+    console.log("Profile created:", newUserProfile);
+    console.log("Users array:", users);
 
     toast({
       title: "Profile Created!",
