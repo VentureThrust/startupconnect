@@ -79,26 +79,34 @@ interface ChatInputProps {
 export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, placeholder }) => {
   const [message, setMessage] = React.useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSend = () => {
     if (message.trim()) {
       onSendMessage(message);
       setMessage("");
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSend();
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <Input
         type="text"
         placeholder={placeholder || "Type a message..."}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
         className="flex-1"
       />
-      <Button type="submit" size="icon">
+      <Button type="button" size="icon" onClick={handleSend}>
         <Send className="h-4 w-4" />
       </Button>
-    </form>
+    </div>
   );
 };
+
