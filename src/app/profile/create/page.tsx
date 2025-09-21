@@ -57,7 +57,7 @@ export default function CreateProfilePage() {
     productDetails: "",
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: profileData,
   });
@@ -101,18 +101,18 @@ export default function CreateProfilePage() {
     }
   };
   
-  function onSubmit() {
+  function onSubmit(data: z.infer<typeof profileSchema>) {
     // This is a mock implementation. In a real app, you'd save this to a database.
     const newUserProfile = {
       id: `user-${Date.now()}`,
-      avatarUrl: `https://picsum.photos/seed/${profileData.name}/100/100`,
-      name: profileData.name,
-      startupName: profileData.startupName,
-      college: profileData.college,
-      description: profileData.description,
-      skills: profileData.skills.split(',').map(s => s.trim()),
-      experience: profileData.experience,
-      productDetails: profileData.productDetails,
+      avatarUrl: `https://picsum.photos/seed/${data.name}/100/100`,
+      name: data.name,
+      startupName: data.startupName,
+      college: data.college,
+      description: data.description,
+      skills: data.skills.split(',').map(s => s.trim()),
+      experience: data.experience,
+      productDetails: data.productDetails,
     };
     
     // For demonstration, we'll replace the existing user or add a new one.
@@ -149,7 +149,7 @@ export default function CreateProfilePage() {
                 placeholder="Type your answer..."
               />
             ) : (
-              <Button onClick={onSubmit} className="w-full">
+              <Button onClick={form.handleSubmit(onSubmit)} className="w-full">
                 Save Profile
               </Button>
             )}
