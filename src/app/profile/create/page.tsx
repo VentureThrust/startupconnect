@@ -128,7 +128,7 @@ export default function CreateProfilePage() {
       title: "Profile Created!",
       description: "Your profile has been successfully created. You can now explore projects.",
     });
-    router.push("/profile");
+    router.push("/discover");
   }
 
   return (
