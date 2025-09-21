@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { users } from "@/lib/data";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,7 +14,8 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // In a real app, you'd handle authentication here.
-    // For now, we'll just redirect to the profile creation page.
+    // For now, we'll clear mock data and redirect to profile creation.
+    users.splice(0, users.length);
     router.push("/profile/create");
   };
 

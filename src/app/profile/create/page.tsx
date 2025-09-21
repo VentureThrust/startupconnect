@@ -13,7 +13,6 @@ import { ChatInput, ChatMessages, type Message } from "@/components/chat";
 import { User, Bot } from "lucide-react";
 import { users } from "@/lib/data";
 
-
 const profileQuestions = [
     "What's your full name?",
     "What's the name of your startup?",
@@ -25,13 +24,13 @@ const profileQuestions = [
 ];
 
 const profileSchema = z.object({
-  name: z.string().min(2),
-  startupName: z.string().min(2),
+  name: z.string().min(2, "Please enter your name."),
+  startupName: z.string().min(2, "Please enter your startup's name."),
   college: z.string().optional(),
-  description: z.string().min(10),
-  skills: z.string().min(1),
-  experience: z.string().min(20),
-  productDetails: z.string().min(20),
+  description: z.string().min(10, "Your pitch should be at least 10 characters."),
+  skills: z.string().min(1, "Please list at least one skill."),
+  experience: z.string().min(20, "Please provide more details about your experience."),
+  productDetails: z.string().min(20, "Please provide more details about your product."),
 });
 
 export default function CreateProfilePage() {
@@ -47,23 +46,21 @@ export default function CreateProfilePage() {
   ]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const [profileData, setProfileData] = useState<z.infer<typeof profileSchema>>({
-    name: "",
-    startupName: "",
-    college: "",
-    description: "",
-    skills: "",
-    experience: "",
-    productDetails: "",
-  });
-
+  
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
-    defaultValues: profileData,
+    defaultValues: {
+      name: "",
+      startupName: "",
+      college: "",
+      description: "",
+      skills: "",
+      experience: "",
+      productDetails: "",
+    },
   });
 
   const handleSendMessage = async (message: string) => {
-    // Add user message to chat
     const userMessage: Message = {
       id: String(Date.now()),
       content: message,
@@ -72,13 +69,9 @@ export default function CreateProfilePage() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Update profile data
-    const fieldName = Object.keys(profileSchema.shape)[currentQuestionIndex] as keyof typeof profileData;
-    const newProfileData = { ...profileData, [fieldName]: message };
-    setProfileData(newProfileData);
+    const fieldName = Object.keys(profileSchema.shape)[currentQuestionIndex] as keyof z.infer<typeof profileSchema>;
     form.setValue(fieldName, message);
 
-    // Ask next question or complete profile
     const nextQuestionIndex = currentQuestionIndex + 1;
     if (nextQuestionIndex < profileQuestions.length) {
       setCurrentQuestionIndex(nextQuestionIndex);
@@ -93,7 +86,7 @@ export default function CreateProfilePage() {
       setIsComplete(true);
       const botMessage: Message = {
         id: String(Date.now() + 1),
-        content: "Great! Your profile is complete. You can now save it.",
+        content: "Great! Your profile is complete. Please review and save it.",
         role: "assistant",
         icon: Bot
       };
@@ -102,7 +95,6 @@ export default function CreateProfilePage() {
   };
   
   function onSubmit(data: z.infer<typeof profileSchema>) {
-    // This is a mock implementation. In a real app, you'd save this to a database.
     const newUserProfile = {
       id: `user-${Date.now()}`,
       avatarUrl: `https://picsum.photos/seed/${data.name}/100/100`,
@@ -115,17 +107,15 @@ export default function CreateProfilePage() {
       productDetails: data.productDetails,
     };
     
-    // Replace the existing user or add a new one. This ensures data persistence for the demo.
+    // This is a mock implementation. In a real app, you'd save this to a database.
+    // We are replacing any existing user data with this new profile.
     users.splice(0, users.length, newUserProfile);
-    
-    console.log("Profile created:", newUserProfile);
-    console.log("Users array:", users);
 
     toast({
       title: "Profile Created!",
-      description: "Your profile has been successfully created. You will be redirected to your profile.",
+      description: "Your profile has been successfully created. You will be redirected to the discover page.",
     });
-    router.push("/profile");
+    router.push("/discover");
   }
 
   return (
@@ -134,7 +124,7 @@ export default function CreateProfilePage() {
         <CardHeader>
           <CardTitle className="font-headline text-3xl">Create Your Profile</CardTitle>
           <CardDescription>
-            Answer a few questions to build your profile.
+            Answer a few questions to build your profile with our AI assistant.
           </CardDescription>
         </CardHeader>
         <CardContent>
