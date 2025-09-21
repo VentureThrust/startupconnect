@@ -115,7 +115,7 @@ export default function CreateProfilePage() {
       productDetails: data.productDetails,
     };
     
-    // Replace the existing user or add a new one.
+    // Replace the existing user or add a new one. This ensures data persistence for the demo.
     users.splice(0, users.length, newUserProfile);
     
     console.log("Profile created:", newUserProfile);
