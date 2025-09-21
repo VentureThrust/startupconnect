@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,6 +74,7 @@ export default function CreateProfilePage() {
     // Programmatically set the form value for the current question
     const fieldName = Object.keys(profileSchema.shape)[currentQuestionIndex] as keyof ProfileFormValues;
     form.setValue(fieldName, message);
+    form.trigger(fieldName); // Trigger validation for the field
 
     const nextQuestionIndex = currentQuestionIndex + 1;
     if (nextQuestionIndex < profileQuestions.length) {
@@ -141,18 +142,20 @@ export default function CreateProfilePage() {
           <div className="space-y-4">
             <ChatMessages messages={messages} />
             
-            {!isComplete ? (
-              <ChatInput
-                onSendMessage={handleSendMessage}
-                placeholder="Type your answer..."
-              />
-            ) : (
-               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-                <Button type="submit" className="w-full">
-                  Save Profile and Continue
-                </Button>
+            <FormProvider {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+                {!isComplete ? (
+                  <ChatInput
+                    onSendMessage={handleSendMessage}
+                    placeholder="Type your answer..."
+                  />
+                ) : (
+                  <Button type="submit" className="w-full">
+                    Save Profile and Continue
+                  </Button>
+                )}
               </form>
-            )}
+            </FormProvider>
           </div>
         </CardContent>
       </Card>
