@@ -14,24 +14,26 @@ import { User, Bot } from "lucide-react";
 import { users } from "@/lib/data";
 
 const profileQuestions = [
-    "What's your full name?",
-    "What's the name of your startup?",
-    "What college/university do you attend (or did you attend)?",
+    "Welcome to Nexus Start! I'm here to help you build your profile. First, what's your full name?",
+    "Great! Now, what's the name of your startup or project idea?",
+    "What college/university do you attend (or did you recently graduate from)?",
     "Give me a short, one-sentence pitch for your startup.",
-    "What are your key skills? (e.g., React, UI/UX Design, Marketing)",
-    "Briefly describe your professional experience and background.",
-    "Tell me about the product you are building. What problem does it solve?",
+    "What are your key skills? Please list them, separated by commas (e.g., React, UI/UX Design, Marketing).",
+    "Briefly describe your professional experience or any relevant background.",
+    "Finally, tell me more about the product you are building. What problem does it solve?",
 ];
 
 const profileSchema = z.object({
   name: z.string().min(2, "Please enter your name."),
   startupName: z.string().min(2, "Please enter your startup's name."),
-  college: z.string().optional(),
+  college: z.string().min(2, "Please enter your college."),
   description: z.string().min(10, "Your pitch should be at least 10 characters."),
   skills: z.string().min(1, "Please list at least one skill."),
   experience: z.string().min(20, "Please provide more details about your experience."),
   productDetails: z.string().min(20, "Please provide more details about your product."),
 });
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function CreateProfilePage() {
   const { toast } = useToast();
@@ -39,7 +41,7 @@ export default function CreateProfilePage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello! I'm here to help you create your profile. Let's start with the first question: " + profileQuestions[0],
+      content: profileQuestions[0],
       role: "assistant",
       icon: Bot
     }
@@ -47,7 +49,7 @@ export default function CreateProfilePage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   
-  const form = useForm<z.infer<typeof profileSchema>>({
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: "",
@@ -69,35 +71,41 @@ export default function CreateProfilePage() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    const fieldName = Object.keys(profileSchema.shape)[currentQuestionIndex] as keyof z.infer<typeof profileSchema>;
+    // Programmatically set the form value for the current question
+    const fieldName = Object.keys(profileSchema.shape)[currentQuestionIndex] as keyof ProfileFormValues;
     form.setValue(fieldName, message);
 
     const nextQuestionIndex = currentQuestionIndex + 1;
     if (nextQuestionIndex < profileQuestions.length) {
       setCurrentQuestionIndex(nextQuestionIndex);
-      const botMessage: Message = {
-        id: String(Date.now() + 1),
-        content: profileQuestions[nextQuestionIndex],
-        role: "assistant",
-        icon: Bot
-      };
-      setMessages((prev) => [...prev, botMessage]);
+      // Give a slight delay for a more natural chat flow
+      setTimeout(() => {
+        const botMessage: Message = {
+            id: String(Date.now() + 1),
+            content: profileQuestions[nextQuestionIndex],
+            role: "assistant",
+            icon: Bot
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }, 500);
     } else {
       setIsComplete(true);
-      const botMessage: Message = {
-        id: String(Date.now() + 1),
-        content: "Great! Your profile is complete. Please review and save it.",
-        role: "assistant",
-        icon: Bot
-      };
-      setMessages((prev) => [...prev, botMessage]);
+      setTimeout(() => {
+        const botMessage: Message = {
+            id: String(Date.now() + 1),
+            content: "Excellent! That's all I need. Please review and save your profile to continue.",
+            role: "assistant",
+            icon: Bot
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }, 500);
     }
   };
   
-  function onSubmit(data: z.infer<typeof profileSchema>) {
+  function onSubmit(data: ProfileFormValues) {
     const newUserProfile = {
       id: `user-${Date.now()}`,
-      avatarUrl: `https://picsum.photos/seed/${data.name}/100/100`,
+      avatarUrl: `https://picsum.photos/seed/${data.name.split(' ').join('')}/100/100`,
       name: data.name,
       startupName: data.startupName,
       college: data.college,
@@ -107,38 +115,41 @@ export default function CreateProfilePage() {
       productDetails: data.productDetails,
     };
     
-    // This is a mock implementation. In a real app, you'd save this to a database.
-    // We are replacing any existing user data with this new profile.
+    // Replace any existing user data with this new profile.
+    // This simulates a single-user login session.
     users.splice(0, users.length, newUserProfile);
 
     toast({
       title: "Profile Created!",
-      description: "Your profile has been successfully created. You will be redirected to the discover page.",
+      description: "Welcome to Nexus Start. You can now discover and create projects.",
     });
+
+    // Redirect to the discover page to start using the app
     router.push("/discover");
   }
 
   return (
-    <div className="container mx-auto max-w-2xl py-12 px-4">
-      <Card>
+    <div className="container mx-auto flex min-h-screen items-center justify-center py-12 px-4">
+      <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="font-headline text-3xl">Create Your Profile</CardTitle>
+          <CardTitle className="font-headline text-3xl">Let's Build Your Profile</CardTitle>
           <CardDescription>
-            Answer a few questions to build your profile with our AI assistant.
+            Answer a few questions with our AI assistant to get started.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <ChatMessages messages={messages} />
+            
             {!isComplete ? (
               <ChatInput
                 onSendMessage={handleSendMessage}
                 placeholder="Type your answer..."
               />
             ) : (
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
                 <Button type="submit" className="w-full">
-                  Save Profile
+                  Save Profile and Continue
                 </Button>
               </form>
             )}

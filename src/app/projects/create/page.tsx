@@ -55,19 +55,26 @@ export default function CreateProjectPage() {
   const projectId = searchParams.get('id');
   const currentUser = users.length > 0 ? users[0] : null;
 
-  const existingProject = projectId ? projects.find(p => p.id === projectId) : undefined;
+  useEffect(() => {
+    if (!currentUser) {
+      router.push('/login');
+    }
+  }, [currentUser, router]);
+
+
+  const existingProject = projectId ? projects.find(p => p.id === projectId && p.ownerId === currentUser?.id) : undefined;
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      projectName: existingProject?.name || "",
-      description: existingProject?.description || "",
-      longDescription: existingProject?.longDescription || "",
-      requiredSkills: existingProject?.requiredSkills.join(", ") || "",
-      teamSize: [existingProject?.teamSize || 2],
-      compensation: existingProject?.compensation || undefined,
-      equitySplit: existingProject?.equitySplit || "",
-      incentives: existingProject?.incentives || "",
+      projectName: "",
+      description: "",
+      longDescription: "",
+      requiredSkills: "",
+      teamSize: [2],
+      compensation: undefined,
+      equitySplit: "",
+      incentives: "",
     },
     mode: "onChange",
   });
@@ -87,15 +94,19 @@ export default function CreateProjectPage() {
     }
   }, [existingProject, form]);
 
+  if (!currentUser) {
+    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>;
+  }
 
   function onSubmit(data: ProjectFormValues) {
+    // This check is redundant due to the useEffect hook, but good for safety
     if (!currentUser) {
         toast({
             variant: "destructive",
             title: "Authentication Error",
-            description: "You must have a profile to create a project.",
+            description: "You must be logged in to create a project.",
         });
-        router.push('/profile/create');
+        router.push('/login');
         return;
     }
 
@@ -135,7 +146,6 @@ export default function CreateProjectPage() {
         projects.push(newProject);
     }
     
-    console.log(data);
     toast({
       title: `Project ${existingProject ? 'Updated' : 'Posted'}!`,
       description: `Your project is now ${existingProject ? 'updated' : 'live for collaborators to discover'}.`,
