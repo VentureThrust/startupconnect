@@ -16,6 +16,7 @@ import { User, Bot } from "lucide-react";
 const profileQuestions = [
     "What's your full name?",
     "What's the name of your startup?",
+    "What college/university do you attend (or did you attend)?",
     "Give me a short, one-sentence pitch for your startup.",
     "What are your key skills? (e.g., React, UI/UX Design, Marketing)",
     "Briefly describe your professional experience and background.",
@@ -25,6 +26,7 @@ const profileQuestions = [
 const profileSchema = z.object({
   name: z.string().min(2),
   startupName: z.string().min(2),
+  college: z.string().optional(),
   description: z.string().min(10),
   skills: z.string().min(1),
   experience: z.string().min(20),
@@ -47,6 +49,7 @@ export default function CreateProfilePage() {
   const [profileData, setProfileData] = useState<z.infer<typeof profileSchema>>({
     name: "",
     startupName: "",
+    college: "",
     description: "",
     skills: "",
     experience: "",
@@ -134,4 +137,3 @@ export default function CreateProfilePage() {
     </div>
   );
 }
-

@@ -1,8 +1,10 @@
+
 export type UserProfile = {
   id: string;
   name: string;
   avatarUrl: string;
   startupName: string;
+  college?: string;
   description: string;
   skills: string[];
   experience: string;

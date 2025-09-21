@@ -1,10 +1,11 @@
+
 import Image from "next/image";
 import { users, projects } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Pencil, User, Building, Lightbulb, Briefcase, Code } from "lucide-react";
+import { Pencil, User, Building, Lightbulb, Briefcase, Code, GraduationCap } from "lucide-react";
 import { ProjectList } from "@/components/project-list";
 
 export default function ProfilePage() {
@@ -38,6 +39,7 @@ export default function ProfilePage() {
             </div>
             <h1 className="text-3xl font-bold font-headline">{user.name}</h1>
             <p className="text-muted-foreground">{user.startupName}</p>
+            {user.college && <p className="text-muted-foreground flex items-center gap-2 mt-1"><GraduationCap className="h-4 w-4"/> {user.college}</p>}
             <Button variant="outline" size="sm" asChild className="mt-4">
                 <Link href="/profile/create">
                     <Pencil className="mr-2 h-4 w-4" /> Edit Profile
