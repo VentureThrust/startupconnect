@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -115,12 +115,8 @@ export default function CreateProfilePage() {
       productDetails: data.productDetails,
     };
     
-    // For demonstration, we'll replace the existing user or add a new one.
-    if (users.length > 0) {
-        users[0] = newUserProfile;
-    } else {
-        users.push(newUserProfile);
-    }
+    // Replace the existing user or add a new one.
+    users.splice(0, users.length, newUserProfile);
     
     console.log(users);
 

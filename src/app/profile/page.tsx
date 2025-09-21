@@ -9,6 +9,8 @@ import { Pencil, User, Building, Lightbulb, Briefcase, Code, GraduationCap } fro
 import { ProjectList } from "@/components/project-list";
 
 export default function ProfilePage() {
+  // In a real app, you'd get the current user from session/auth.
+  // For this demo, we'll just take the first user from our mock data.
   const user = users.length > 0 ? users[0] : null;
   const userProjects = user ? projects.filter(p => p.ownerId === user.id) : [];
 
