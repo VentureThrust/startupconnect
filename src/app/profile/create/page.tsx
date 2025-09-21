@@ -136,7 +136,7 @@ export default function CreateProfilePage() {
                 placeholder="Type your answer..."
               />
             ) : (
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <Button type="submit" className="w-full">
                   Save Profile
                 </Button>
