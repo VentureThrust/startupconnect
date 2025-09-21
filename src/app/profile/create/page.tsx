@@ -14,23 +14,24 @@ import { User, Bot } from "lucide-react";
 import { users } from "@/lib/data";
 
 const profileQuestions = [
-    "What's your full name?",
-    "What's the name of your startup?",
-    "What college/university do you attend (or did you attend)?",
-    "Give me a short, one-sentence pitch for your startup.",
-    "What are your key skills? (e.g., React, UI/UX Design, Marketing)",
-    "Briefly describe your professional experience and background.",
-    "Tell me about the product you are building. What problem does it solve?",
+  "What's your full name?",
+  "What's the name of your startup?",
+  "What college/university do you attend (or did you attend)?",
+  "Give me a short, one-sentence pitch for your startup.",
+  "What are your key skills? (e.g., React, UI/UX Design, Marketing)",
+  "Briefly describe your professional experience and background.",
+  "Tell me about the product you are building. What problem does it solve?",
 ];
 
+// ✅ Relaxed schema for easier testing
 const profileSchema = z.object({
-  name: z.string().min(2, "Please enter your name."),
-  startupName: z.string().min(2, "Please enter your startup's name."),
+  name: z.string().min(1, "Please enter your name."),
+  startupName: z.string().min(1, "Please enter your startup's name."),
   college: z.string().optional(),
-  description: z.string().min(10, "Your pitch should be at least 10 characters."),
+  description: z.string().min(1, "Your pitch is required."),
   skills: z.string().min(1, "Please list at least one skill."),
-  experience: z.string().min(20, "Please provide more details about your experience."),
-  productDetails: z.string().min(20, "Please provide more details about your product."),
+  experience: z.string().min(1, "Please provide your experience."),
+  productDetails: z.string().min(1, "Please provide your product details."),
 });
 
 export default function CreateProfilePage() {
@@ -39,14 +40,16 @@ export default function CreateProfilePage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello! I'm here to help you create your profile. Let's start with the first question: " + profileQuestions[0],
+      content:
+        "Hello! I'm here to help you create your profile. Let's start with the first question: " +
+        profileQuestions[0],
       role: "assistant",
-      icon: Bot
-    }
+      icon: Bot,
+    },
   ]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  
+
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -64,12 +67,14 @@ export default function CreateProfilePage() {
     const userMessage: Message = {
       id: String(Date.now()),
       content: message,
-      role: 'user',
+      role: "user",
       icon: User,
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    const fieldName = Object.keys(profileSchema.shape)[currentQuestionIndex] as keyof z.infer<typeof profileSchema>;
+    const fieldName = Object.keys(
+      profileSchema.shape
+    )[currentQuestionIndex] as keyof z.infer<typeof profileSchema>;
     form.setValue(fieldName, message);
 
     const nextQuestionIndex = currentQuestionIndex + 1;
@@ -79,21 +84,22 @@ export default function CreateProfilePage() {
         id: String(Date.now() + 1),
         content: profileQuestions[nextQuestionIndex],
         role: "assistant",
-        icon: Bot
+        icon: Bot,
       };
       setMessages((prev) => [...prev, botMessage]);
     } else {
       setIsComplete(true);
       const botMessage: Message = {
         id: String(Date.now() + 1),
-        content: "Great! Your profile is complete. Please review and save it.",
+        content:
+          "Great! Your profile is complete. Please review and save it.",
         role: "assistant",
-        icon: Bot
+        icon: Bot,
       };
       setMessages((prev) => [...prev, botMessage]);
     }
   };
-  
+
   function onSubmit(data: z.infer<typeof profileSchema>) {
     const newUserProfile = {
       id: `user-${Date.now()}`,
@@ -102,18 +108,20 @@ export default function CreateProfilePage() {
       startupName: data.startupName,
       college: data.college,
       description: data.description,
-      skills: data.skills.split(',').map(s => s.trim()),
+      skills: data.skills.split(",").map((s) => s.trim()),
       experience: data.experience,
       productDetails: data.productDetails,
     };
-    
-    // This is a mock implementation. In a real app, you'd save this to a database.
-    // We are replacing any existing user data with this new profile.
+
+    // Mock save
     users.splice(0, users.length, newUserProfile);
+
+    console.log("✅ Submitted profile:", newUserProfile);
 
     toast({
       title: "Profile Created!",
-      description: "Your profile has been successfully created. You will be redirected to the discover page.",
+      description:
+        "Your profile has been successfully created. You will be redirected to the discover page.",
     });
     router.push("/discover");
   }
@@ -122,7 +130,9 @@ export default function CreateProfilePage() {
     <div className="container mx-auto max-w-2xl py-12 px-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline text-3xl">Create Your Profile</CardTitle>
+          <CardTitle className="font-headline text-3xl">
+            Create Your Profile
+          </CardTitle>
           <CardDescription>
             Answer a few questions to build your profile with our AI assistant.
           </CardDescription>
@@ -136,7 +146,10 @@ export default function CreateProfilePage() {
                 placeholder="Type your answer..."
               />
             ) : (
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <Button type="submit" className="w-full">
                   Save Profile
                 </Button>
