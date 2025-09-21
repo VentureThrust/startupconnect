@@ -136,9 +136,11 @@ export default function CreateProfilePage() {
                 placeholder="Type your answer..."
               />
             ) : (
-              <Button onClick={form.handleSubmit(onSubmit)} className="w-full">
-                Save Profile
-              </Button>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Button type="submit" className="w-full">
+                  Save Profile
+                </Button>
+              </form>
             )}
           </div>
         </CardContent>
