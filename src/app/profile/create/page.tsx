@@ -63,6 +63,8 @@ export default function CreateProfilePage() {
   });
 
   const handleSendMessage = async (message: string) => {
+    if (isComplete) return;
+
     const userMessage: Message = {
       id: String(Date.now()),
       content: message,

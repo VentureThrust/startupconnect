@@ -109,4 +109,3 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, placeholder
     </div>
   );
 };
-
