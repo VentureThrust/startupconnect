@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,25 +14,18 @@ import { User, Bot } from "lucide-react";
 import { users } from "@/lib/data";
 
 const profileQuestions = [
-  "What's your full name?",
-  "What's the name of your startup?",
-  "What college/university do you attend (or did you attend)?",
-  "Give me a short, one-sentence pitch for your startup.",
-  "What are your key skills? (e.g., React, UI/UX Design, Marketing)",
-  "Briefly describe your professional experience and background.",
-  "Tell me about the product you are building. What problem does it solve?",
+
 ];
 
 // ✅ Relaxed schema for easier testing
 const profileSchema = z.object({
-  name: z.string().min(1, "Please enter your name."),
-  startupName: z.string().min(1, "Please enter your startup's name."),
-  college: z.string().optional(),
-  description: z.string().min(1, "Your pitch is required."),
+
   skills: z.string().min(1, "Please list at least one skill."),
   experience: z.string().min(1, "Please provide your experience."),
   productDetails: z.string().min(1, "Please provide your product details."),
 });
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function CreateProfilePage() {
   const { toast } = useToast();
@@ -40,9 +33,7 @@ export default function CreateProfilePage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content:
-        "Hello! I'm here to help you create your profile. Let's start with the first question: " +
-        profileQuestions[0],
+
       role: "assistant",
       icon: Bot,
     },
@@ -50,7 +41,6 @@ export default function CreateProfilePage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
 
-  const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: "",
@@ -64,6 +54,8 @@ export default function CreateProfilePage() {
   });
 
   const handleSendMessage = async (message: string) => {
+    if (isComplete) return;
+
     const userMessage: Message = {
       id: String(Date.now()),
       content: message,
@@ -72,38 +64,17 @@ export default function CreateProfilePage() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    const fieldName = Object.keys(
-      profileSchema.shape
-    )[currentQuestionIndex] as keyof z.infer<typeof profileSchema>;
+
     form.setValue(fieldName, message);
+    form.trigger(fieldName); // Trigger validation for the field
 
     const nextQuestionIndex = currentQuestionIndex + 1;
     if (nextQuestionIndex < profileQuestions.length) {
       setCurrentQuestionIndex(nextQuestionIndex);
-      const botMessage: Message = {
-        id: String(Date.now() + 1),
-        content: profileQuestions[nextQuestionIndex],
-        role: "assistant",
-        icon: Bot,
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    } else {
-      setIsComplete(true);
-      const botMessage: Message = {
-        id: String(Date.now() + 1),
-        content:
-          "Great! Your profile is complete. Please review and save it.",
-        role: "assistant",
-        icon: Bot,
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    }
-  };
 
-  function onSubmit(data: z.infer<typeof profileSchema>) {
     const newUserProfile = {
       id: `user-${Date.now()}`,
-      avatarUrl: `https://picsum.photos/seed/${data.name}/100/100`,
+      avatarUrl: `https://picsum.photos/seed/${data.name.split(' ').join('')}/100/100`,
       name: data.name,
       startupName: data.startupName,
       college: data.college,
@@ -113,48 +84,34 @@ export default function CreateProfilePage() {
       productDetails: data.productDetails,
     };
 
-    // Mock save
     users.splice(0, users.length, newUserProfile);
 
     console.log("✅ Submitted profile:", newUserProfile);
 
     toast({
       title: "Profile Created!",
-      description:
-        "Your profile has been successfully created. You will be redirected to the discover page.",
+
     });
+
+    // Redirect to the discover page to start using the app
     router.push("/discover");
   }
 
   return (
-    <div className="container mx-auto max-w-2xl py-12 px-4">
-      <Card>
+    <div className="container mx-auto flex min-h-screen items-center justify-center py-12 px-4">
+      <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="font-headline text-3xl">
-            Create Your Profile
-          </CardTitle>
+
           <CardDescription>
-            Answer a few questions to build your profile with our AI assistant.
+            Answer a few questions with our AI assistant to get started.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <ChatMessages messages={messages} />
-            {!isComplete ? (
-              <ChatInput
-                onSendMessage={handleSendMessage}
-                placeholder="Type your answer..."
-              />
-            ) : (
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <Button type="submit" className="w-full">
-                  Save Profile
-                </Button>
+
               </form>
-            )}
+            </FormProvider>
           </div>
         </CardContent>
       </Card>

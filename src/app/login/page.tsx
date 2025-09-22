@@ -7,25 +7,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { users } from "@/lib/data";
+import { NexusStartLogo } from "@/components/icons";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    // In a real app, you'd handle authentication here.
-    // For now, we'll clear mock data and redirect to profile creation.
+    // This is a mock authentication flow.
+    // We clear any existing user data to simulate a new login.
     users.splice(0, users.length);
     router.push("/profile/create");
   };
 
   return (
-    <div className="container mx-auto max-w-sm py-24 px-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-3xl">Welcome Back</CardTitle>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+        <div className="absolute top-4 left-4">
+            <Link href="/" className="flex items-center space-x-2 text-foreground/80 hover:text-foreground">
+                <NexusStartLogo className="h-6 w-6" />
+                <span className="font-bold font-headline">Nexus Start</span>
+            </Link>
+        </div>
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+            <div className="mb-4">
+                <NexusStartLogo className="h-12 w-12 mx-auto text-primary" />
+            </div>
+          <CardTitle className="font-headline text-3xl">Welcome to Nexus Start</CardTitle>
           <CardDescription>
-            Sign in to continue to Nexus Start.
+            Sign in or create an account to continue.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -40,7 +51,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full">
-              Login
+              Continue with Email
             </Button>
           </form>
         </CardContent>

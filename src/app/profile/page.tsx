@@ -1,30 +1,32 @@
 
+'use client';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import Image from "next/image";
 import { users, projects } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Pencil, User, Building, Lightbulb, Briefcase, Code, GraduationCap } from "lucide-react";
+import { Pencil, Building, Lightbulb, Briefcase, Code, GraduationCap } from "lucide-react";
 import { ProjectList } from "@/components/project-list";
 
 export default function ProfilePage() {
-  // In a real app, you'd get the current user from session/auth.
-  // For this demo, we'll just take the first user from our mock data.
+  const router = useRouter();
   const user = users.length > 0 ? users[0] : null;
-  const userProjects = user ? projects.filter(p => p.ownerId === user.id) : [];
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+    }
+  }, [user, router]);
 
   if (!user) {
-    return (
-        <div className="container mx-auto max-w-4xl py-12 px-4 text-center">
-            <h1 className="text-3xl font-bold font-headline mb-4">No Profile Found</h1>
-            <p className="text-muted-foreground mb-8">It looks like you haven't created a profile yet.</p>
-            <Button asChild>
-                <Link href="/profile/create">Create Your Profile</Link>
-            </Button>
-        </div>
-    )
+    // This will be shown briefly while redirecting
+    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>;
   }
+  
+  const userProjects = projects.filter(p => p.ownerId === user.id);
 
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4">

@@ -1,9 +1,25 @@
 
-import { projects } from "@/lib/data";
+'use client';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { projects, users } from "@/lib/data";
 import { ProjectList } from "@/components/project-list";
 import { Bookmark } from "lucide-react";
 
 export default function SavedProjectsPage() {
+  const router = useRouter();
+  const currentUser = users.length > 0 ? users[0] : null;
+
+  useEffect(() => {
+    if (!currentUser) {
+      router.push('/login');
+    }
+  }, [currentUser, router]);
+
+  if (!currentUser) {
+    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>;
+  }
+
   const savedProjects = projects.filter(p => p.saved);
 
   return (
